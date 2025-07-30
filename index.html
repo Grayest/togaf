@@ -1,1 +1,838 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOGAF Enterprise Architecture Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .quiz-container {
+            padding: 30px;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question-number {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option {
+            margin-bottom: 12px;
+        }
+
+        .option label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option label:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .option.correct label {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .option.incorrect label {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            border-left: 4px solid #17a2b8;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .explanation h4 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            transition: width 0.5s ease;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .score-excellent { color: #28a745; }
+        .score-good { color: #17a2b8; }
+        .score-fair { color: #ffc107; }
+        .score-poor { color: #dc3545; }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TOGAF Enterprise Architecture Quiz</h1>
+            <p>Test your knowledge of TOGAF ADM and Enterprise Architecture concepts</p>
+        </div>
+
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="score-display">
+                Question <span id="currentQuestion">1</span> of <span id="totalQuestions">20</span> | 
+                Score: <span id="currentScore">0</span>/<span id="maxScore">20</span>
+            </div>
+
+            <!-- Questions will be dynamically inserted here -->
+            <div id="questionsContainer"></div>
+
+            <div class="results" id="results">
+                <h2>Quiz Complete!</h2>
+                <div class="final-score" id="finalScore">0/20</div>
+                <p id="scoreMessage"></p>
+                <button class="btn btn-primary restart-btn" onclick="restartQuiz()">Take Quiz Again</button>
+            </div>
+
+            <div class="controls" id="controls">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>Previous</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+                <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+                <button class="btn btn-primary" id="finishBtn" onclick="finishQuiz()" style="display: none;">Finish Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What does the TOGAF ADM recommend for use in developing an Architecture Vision document?",
+                options: [
+                    "Requirements Management",
+                    "Architecture Principles", 
+                    "Gap Analysis",
+                    "Business Scenarios"
+                ],
+                correct: 3,
+                explanation: "Business scenarios are a technique recommended by the TOGAF ADM for use in developing an Architecture Vision document. Business scenarios help capture business requirements and drivers, create common vision among stakeholders, and identify architecture requirements."
+            },
+            {
+                question: "Which of the following best describes the class of information known as the Reference Library within the Architecture Repository?",
+                options: [
+                    "Guidelines and templates used to create new architectures",
+                    "Specifications to which architectures must conform",
+                    "A record of the governance activity across the enterprise",
+                    "Processes to support governance of the Architecture Repository"
+                ],
+                correct: 0,
+                explanation: "The Reference Library contains guidelines and templates used to create new architectures. It provides resources like generic building blocks, patterns, models, standards, frameworks, methods, and best practices."
+            },
+            {
+                question: "Consider the following ADM phases objectives. Objective 1: Develop the Target Data Architecture that enables the Business Architecture and the Architecture Vision. Objective 2: Develop the Target Business Architecture that describes how the enterprise needs to operate to achieve the business goals. Objective 3: Develop a high-level aspirational vision of the capabilities and business value to be delivered. Objective 4: Develop the Target Application Architecture that enables the Business Architecture. Which phase does each objective match?",
+                options: [
+                    "1C-2B-3A-4C",
+                    "1A-2B-3C-4D",
+                    "1B-2D-3A-4C",
+                    "1C-2D-3B-4A"
+                ],
+                correct: 0,
+                explanation: "1C (Phase C develops Target Data Architecture), 2B (Phase B develops Target Business Architecture), 3A (Phase A develops high-level aspirational vision), 4C (Phase C develops Target Application Architecture)."
+            },
+            {
+                question: "Which statements highlight the value and necessity for Architecture Governance to be adopted within organizations? 1. All processes will be established to minimize potential conflicts of interest. 2. More effective strategic decision-making by C-Level executives. 3. All actions will be available for inspection by authorized parties. 4. Digital Transformation will be more effective.",
+                options: [
+                    "1 and 4",
+                    "1 and 3",
+                    "2 and 4",
+                    "2 and 3"
+                ],
+                correct: 1,
+                explanation: "Statements 1 and 3 highlight Architecture Governance value: establishing processes to minimize conflicts of interest and ensuring transparency/accountability through inspection by authorized parties."
+            },
+            {
+                question: "You are addressing incompatibilities between key stakeholder preferences regarding time-to-market, cost savings, and product features. Based on TOGAF standard, what is the best approach?",
+                options: [
+                    "Develop alternative Target Architectures and seek stakeholder approval",
+                    "Compromise on full product range rather than time-to-market",
+                    "Use Architecture Vision, Principles, and Requirements to define criteria for alternatives and create architecture views to illustrate impact",
+                    "Review Stakeholder Map and involve department heads in resolving incompatibilities"
+                ],
+                correct: 2,
+                explanation: "Use the Architecture Vision, Principles, and Requirements to define criteria for alternatives, create architecture views showing impact, understand strengths/weaknesses, and conduct formal stakeholder review to decide which alternative to move forward with."
+            },
+            {
+                question: "Which ADM Phase describes development of Business Architecture to support an agreed Architecture Vision, including baseline and target architectures and gap analysis?",
+                options: [
+                    "Phase A",
+                    "Phase B",
+                    "Preliminary Phase",
+                    "Phase C"
+                ],
+                correct: 1,
+                explanation: "Phase B: Business Architecture describes the development of a Business Architecture to support an agreed Architecture Vision, including baseline and target Business Architecture and gap analysis."
+            },
+            {
+                question: "Which of the following is a responsibility of an Architecture Board?",
+                options: [
+                    "Determining the scope of an architecture compliance review",
+                    "Allocating resources for architecture projects",
+                    "Conducting assessments of the maturity level of architecture discipline",
+                    "Achieving consistency between sub-architectures"
+                ],
+                correct: 3,
+                explanation: "One of the key responsibilities of an Architecture Board is to achieve consistency between sub-architectures, ensuring all architectural components work together cohesively to support the overall enterprise architecture vision."
+            },
+            {
+                question: "For an autonomous driving technology company developing Business Architecture for travel assistance services, what risk and security considerations should be included?",
+                options: [
+                    "Focus on third-party relationships and define a trust framework",
+                    "Perform qualitative risk assessment for data assets exchanged with partners",
+                    "Focus on data quality as key factor in risk management",
+                    "Create security domain model and establish security federation with partners"
+                ],
+                correct: 3,
+                explanation: "Create a security domain model for assets with same security level, establish security federation with partners including contractual arrangements and responsibility definitions, and undertake risk assessment for specific data assets."
+            },
+            {
+                question: "Consider an image showing basic architectural concepts. What are items A and B in the stakeholder-concern relationship?",
+                options: [
+                    "A-Candidate Architecture, B-Trade-off",
+                    "A-User, B-Requirement",
+                    "A-Stakeholder, B-Concern",
+                    "A-Base Architecture, B-Target Architecture"
+                ],
+                correct: 2,
+                explanation: "In TOGAF context, a stakeholder is any individual, team, or organization who has interests in the outcome of the architecture. Concerns are those interests which pertain to any aspect of the system's functioning, development or operation."
+            },
+            {
+                question: "Which deliverables match these descriptions? 1. General rules and guidelines, enduring and seldom amended 2. Joint agreements between partners and sponsors 3. Document sent from sponsor to trigger architecture development 4. Quantitative statements for implementation compliance",
+                options: [
+                    "1 Architecture Principles - 2 Architecture Contracts - 3 Request for Architecture Work - 4 Architecture Requirements Specification",
+                    "1 Architecture Contracts - 2 Architecture Requirements Specification - 3 Architecture Vision - 4 Architecture Principles",
+                    "1 Architecture Requirements Specification - 2 Architecture Principles - 3 Architecture Vision - 4 Architecture Contracts",
+                    "1 Architecture Principles - 2 Architecture Contracts - 3 Architecture Requirements Specification - 4 Request for Architecture Work"
+                ],
+                correct: 0,
+                explanation: "1. Architecture Principles (general enduring rules), 2. Architecture Contracts (joint agreements), 3. Request for Architecture Work (triggers development), 4. Architecture Requirements Specification (quantitative compliance statements)."
+            },
+            {
+                question: "Which of the following best describes the purpose of the Gap Analysis technique?",
+                options: [
+                    "To validate non-functional requirements",
+                    "To establish quality metrics for the architecture",
+                    "To determine service levels for the architecture", 
+                    "To identify missing functions"
+                ],
+                correct: 3,
+                explanation: "Gap analysis is used to validate an architecture by highlighting shortfalls between the Baseline Architecture and Target Architecture. One key purpose is to identify missing functions that need to be filled by developing or procuring building blocks."
+            },
+            {
+                question: "For a law firm implementing AI-driven litigation processes, what approach enables development of architecture addressing CIO and partner concerns?",
+                options: [
+                    "Create Communications Plan addressing key stakeholders with architecture summary report",
+                    "Undertake stakeholder analysis documenting concerns in Stakeholder Map, record in Architecture Vision, include risk mitigation through regular assessments",
+                    "Create all possible models for candidate architectures with formal stakeholder review",
+                    "Create uniform business models for all architecture projects with stakeholder training"
+                ],
+                correct: 1,
+                explanation: "Undertake stakeholder analysis documenting stakeholders and concerns in Stakeholder Map, define concerns and views for each group in Architecture Vision document, include risk mitigation through regular assessments for supervised agile implementation."
+            },
+            {
+                question: "Which of the following describes how the Enterprise Continuum is used when developing an enterprise architecture?",
+                options: [
+                    "To identify and understand business requirements",
+                    "To coordinate with other management frameworks in use",
+                    "To describe how an architecture addresses stakeholder concerns",
+                    "To classify architecture and solution assets"
+                ],
+                correct: 3,
+                explanation: "The Enterprise Continuum enables the reuse and integration of architecture and solution assets across different levels of abstraction, scope, and detail, ranging from foundation architectures to organization-specific architectures."
+            },
+            {
+                question: "In which part of the ADM cycle do building block gaps become associated with work packages that will address the gaps?",
+                options: [
+                    "Phases G and H",
+                    "Phase F",
+                    "Phases B, C and D",
+                    "Phase E"
+                ],
+                correct: 3,
+                explanation: "In Phase E of the ADM cycle, building block gaps become associated with work packages that will address the gaps. This phase involves creating an Implementation and Migration Plan defining work packages and Transition Architectures."
+            },
+            {
+                question: "Complete the sentence: In the ADM, documents under development that have not undergone formal review are called ______ and documents that have been reviewed and approved are called ______.",
+                options: [
+                    "'draft' - 'finalized'",
+                    "'draft' - 'approved'",
+                    "'concept' - 'deliverable'",
+                    "'Version 0.1' - 'Version 1.0'"
+                ],
+                correct: 1,
+                explanation: "According to TOGAF Standard, documents under development without formal review are called 'draft' documents, while documents that have been reviewed and approved are called 'approved' documents."
+            },
+            {
+                question: "Complete the sentence: The purpose of Enterprise Architecture is to _______________.",
+                options: [
+                    "take major improvement decisions",
+                    "control the bigger changes",
+                    "guide effective change",
+                    "govern the stakeholders"
+                ],
+                correct: 2,
+                explanation: "The purpose of Enterprise Architecture is to guide effective change by providing coherent views of current and future states, aligning business and IT strategies, and delivering value to stakeholders."
+            },
+            {
+                question: "Which statements highlight the value and necessity for Architecture Governance? 1. Each contracted party acts responsibly 2. All decisions will not create unfair advantage 3. Digital Transformation will be more effective 4. Strategic decision-making will be more effective",
+                options: [
+                    "1 and 2",
+                    "2 and 3",
+                    "3 and 4",
+                    "1 and 4"
+                ],
+                correct: 0,
+                explanation: "Statements 1 and 2 highlight Architecture Governance value by emphasizing responsibility, accountability, fairness, and transparency in architectural activities. Statements 3 and 4 relate more to EA benefits than governance aspects."
+            },
+            {
+                question: "Complete the sentence: When considering agile development, Architecture to Support Project will identify what products the Enterprise needs, the boundary of the products, and what constraints a product owner has; this defines the Enterprise's ___________.",
+                options: [
+                    "operations",
+                    "backlog",
+                    "workflow management",
+                    "lifecycle economics"
+                ],
+                correct: 1,
+                explanation: "This defines the enterprise's backlog. A backlog is a prioritized list of features or tasks needed to deliver a product or service, prioritized by the product owner based on value and urgency."
+            },
+            {
+                question: "Complete the sentence: The key purpose of Gap Analysis is to _____",
+                options: [
+                    "establish quality parameters for the architecture",
+                    "identify potential missing or overlapping functions",
+                    "validate nonfunctional requirements",
+                    "identify commercial building blocks to be purchased"
+                ],
+                correct: 1,
+                explanation: "Gap Analysis compares Baseline and Target Architecture to identify differences and gaps. The main purpose is to identify functions that are missing or overlapping in current and future architectures."
+            },
+            {
+                question: "For an electric vehicle manufacturer developing architectures over five years, how should you decide and organize work to deliver requested architectures?",
+                options: [
+                    "Commence ADM Phase A iteration, identify stakeholders and revise Architecture Vision",
+                    "Research leading data companies to develop high-level Target Architectures",
+                    "Look to superior architecture to plan approach, identify projects, dependencies, and synergies",
+                    "Study how other companies organize data models and application portfolios"
+                ],
+                correct: 2,
+                explanation: "Look to the superior architecture for guidance, identify projects/dependencies/synergies, develop high-level architecture descriptions, determine work needed, identify reference architectures and building blocks, and document options/risks for feasibility analysis."
+            },
+            {
+                question: "Which of the following does the TOGAF standard describe as a package of functionality defined to meet business needs across an organization?",
+                options: [
+                    "An application",
+                    "A deliverable",
+                    "A solution architecture",
+                    "A building block"
+                ],
+                correct: 3,
+                explanation: "TOGAF describes a building block as a package of functionality defined to meet business needs across an organization. Building blocks are reusable components that can be combined to deliver architectures and solutions."
+            },
+            {
+                question: "For a biotechnology company developing secure clinical trial information sharing system, what approach identifies work packages for incremental rollout?",
+                options: [
+                    "Group Solution Building Blocks into work packages using Consolidated Gaps, Solutions and Dependencies Matrix",
+                    "Use Consolidated Gaps, Solutions and Dependencies Matrix as planning tool, classify solutions, group into work packages, regroup into Capability Increments",
+                    "Create Implementation Factor Catalog, use Consolidated Matrix, group similar activities into work packages",
+                    "Determine required Solution Building Blocks, eliminate duplicates, use CRUD matrix to create work packages"
+                ],
+                correct: 1,
+                explanation: "Use Consolidated Gaps, Solutions and Dependencies Matrix as planning tool, classify each solution as new development/purchased/existing, group similar solutions into work packages, regroup into Capability Increments considering clinical trial schedules."
+            },
+            {
+                question: "Which important concept does a Gantt chart showing ADM phases illustrate for Enterprise Architecture Practitioners?",
+                options: [
+                    "Enterprise Architects must use Gantt charts to communicate with Stakeholders",
+                    "Enterprise Architecture must be developed in phases with limited fixed duration",
+                    "ADM phases must be run in a sequenced approach to produce the Architecture",
+                    "ADM phases must be run simultaneously until relevant information is produced"
+                ],
+                correct: 2,
+                explanation: "The Gantt chart demonstrates the sequenced approach to the Architecture Development Method (ADM). Each phase depends on outputs of the previous phase, showing structured approach to enterprise architecture development."
+            },
+            {
+                question: "What are the following activities part of? Risk classification, Risk identification, Initial risk assessment",
+                options: [
+                    "Security Architecture",
+                    "Phase A",
+                    "Phase G",
+                    "Risk Management"
+                ],
+                correct: 3,
+                explanation: "Risk identification, classification, and initial assessment are all part of Risk Management - a generic technique applied across all ADM phases to identify, assess, and address potential risks affecting architecture projects."
+            },
+            {
+                question: "Which of the following best describes the need for the ADM process to be governed?",
+                options: [
+                    "To enable development of reference architectures",
+                    "To verify that the method is being applied correctly",
+                    "To enable a fast response to market changes",
+                    "To permit the architecture domains to be integrated"
+                ],
+                correct: 1,
+                explanation: "Governance ensures architecture development activities are conducted consistently, coherently, and compliantly. It provides means to verify the method is being applied correctly and that deliverables meet quality standards."
+            },
+            {
+                question: "Which of the following best describes the purpose of the Architecture Roadmap?",
+                options: [
+                    "It provides for effective communication of the end architecture project to stakeholders",
+                    "It is sent from the sponsor and triggers the start of an architecture development cycle",
+                    "It forms the basis of a contractual agreement between sponsor and architecture organization",
+                    "It lists work packages on a timeline showing progress towards the Target Architecture"
+                ],
+                correct: 3,
+                explanation: "The Architecture Roadmap provides a high-level view of how the Baseline Architecture will transition to Target Architecture over time, listing work packages on timeline with dependencies, risks, and benefits."
+            },
+            {
+                question: "For a company concerned about ransomware attacks, what steps would you take to improve architecture resilience based on TOGAF standard?",
+                options: [
+                    "Determine business continuity requirements, undertake gap analysis, create change request, get Architecture Board approval, produce new Request for Architecture Work",
+                    "Monitor for technology changes from suppliers, prepare disaster recovery exercise, perform gap analysis, prepare change requests",
+                    "Ensure up-to-date change management processes, manage at infrastructure level, update Technology Architecture baseline",
+                    "Request Architecture Compliance Review for ransomware resilience, identify departments, tailor checklists, review and resolve issues"
+                ],
+                correct: 0,
+                explanation: "Determine business continuity requirements, undertake gap analysis of current EA, make change recommendations, get Architecture Board approval, then produce new Request for Architecture Work to activate ADM cycle for implementation."
+            },
+            {
+                question: "Complete the sentence: The Architecture Landscape is divided into levels known as __________________________.",
+                options: [
+                    "Gaps, Plateaus, and Target Architectures",
+                    "Baseline, Transition and To Be Architectures",
+                    "Segment, Strategic and Capability Architectures",
+                    "Transitional, Complete and incremental Architectures"
+                ],
+                correct: 2,
+                explanation: "The Architecture Landscape is divided into Segment, Strategic and Capability Architectures - different scopes and purposes within an enterprise addressing specific business units, high-level vision, and business capabilities."
+            },
+            {
+                question: "What are the four architecture domains that the TOGAF standard deals with?",
+                options: [
+                    "Business, Data, Application, Technology",
+                    "Capability, Segment, Enterprise, Federated", 
+                    "Baseline, Candidate, Transition, Target",
+                    "Application, Data, Information, Knowledge"
+                ],
+                correct: 0,
+                explanation: "TOGAF divides Enterprise Architecture into four primary domains: Business (strategy, governance, processes), Data (logical and physical data assets), Application (individual applications and interactions), and Technology (software and hardware capabilities)."
+            },
+            {
+                question: "Complete the sentence: The purpose of the Preliminary Phase is to _____________.",
+                options: [
+                    "describe the target architecture",
+                    "define the enterprise strategy",
+                    "identify the stakeholders and their requirements",
+                    "architect an Enterprise Architecture Capability"
+                ],
+                correct: 3,
+                explanation: "The Preliminary Phase aims to architect an Enterprise Architecture Capability that meets stakeholder needs and supports subsequent phases of architecture development, including scope, principles, framework, and governance."
+            },
+            {
+                question: "Consider the illustration showing Architecture Repository, Governing Board, and Enterprise Capability. What are items A, B, and C?",
+                options: [
+                    "A-Enterprise Repository, B-Governance Repository, C-Board Repository",
+                    "A-Architecture Repository, B-Governance Repository, C-Architecture Capability",
+                    "A-Architecture Repository, B-Governing Board, C-Enterprise Capability",
+                    "A-Enterprise Repository, B-Board repository, C-Enterprise Capability"
+                ],
+                correct: 2,
+                explanation: "A-Architecture Repository (contains artifacts structured according to metamodel), B-Governing Board (ensures visibility and manages architecture capability), C-Enterprise Capability (ability to execute mission and meet objectives)."
+            },
+            {
+                question: "For a home improvement store merger requiring system consolidation, what are the most relevant architecture principles?",
+                options: [
+                    "Control Technical Diversity, Interoperability, Data is an Asset, Data is Shared, Business Continuity",
+                    "Service Orientation, Compliance with the Law, Requirements Based Change, Responsive Change Management, Data Security",
+                    "Common Use Applications, Data is an Asset, Common Vocabulary and Data Definitions, Maximize Benefit to the Enterprise, Business Continuity",
+                    "Ease of Use, Common Use Applications, Data is an Asset, Technology Independence, Business Continuity"
+                ],
+                correct: 2,
+                explanation: "For merger consolidation: Common Use Applications (standardize across enterprise), Data is an Asset (central inventory system), Common Vocabulary and Data Definitions (integrate different systems), Maximize Benefit to the Enterprise (cost savings), Business Continuity (uninterrupted operations)."
+            },
+            {
+                question: "For a multinational energy company managing acquisition integration risks, what is the best approach based on TOGAF Standard?",
+                options: [
+                    "Create Business Scenario to describe business problem, evaluate requirements in terms of risks, escalate residual risks to Architecture Board",
+                    "Develop Business Architecture views demonstrating how stakeholder concerns are addressed",
+                    "Evaluate company's readiness for change by identifying factors impacting transformation",
+                    "Document risks in Implementation Factor Catalog to inform implementation decisions"
+                ],
+                correct: 0,
+                explanation: "Create Business Scenario to fully describe the business problem, systematically assess associated risks once requirements are identified, and escalate any residual risks to Architecture Board for appropriate governance oversight."
+            },
+            {
+                question: "For an agribusiness company changing from lentils to another harvest, what approach realizes the CEO's change in direction?",
+                options: [
+                    "Define baseline Technology Architecture first to assess current infrastructure capacity",
+                    "Use architecture definition document and focus on simultaneous phases B,
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let quizCompleted = false;
+
+        function initializeQuiz() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            document.getElementById('maxScore').textContent = questions.length;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const question = questions[currentQuestionIndex];
+            
+            container.innerHTML = `
+                <div class="question-card active">
+                    <div class="question-number">Question ${currentQuestionIndex + 1} of ${questions.length}</div>
+                    <div class="question">${question.question}</div>
+                    <ul class="options">
+                        ${question.options.map((option, index) => `
+                            <li class="option" data-index="${index}">
+                                <label>
+                                    <input type="radio" name="answer" value="${index}">
+                                    <span>${String.fromCharCode(65 + index)}. ${option}</span>
+                                </label>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="explanation" id="explanation">
+                        <h4>Explanation:</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for radio buttons
+            const radioButtons = container.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('submitBtn').disabled = false;
+                });
+            });
+
+            updateProgress();
+            updateControls();
+            
+            // Clear previous answer if revisiting
+            if (userAnswers[currentQuestionIndex] !== undefined) {
+                showAnswer();
+            }
+        }
+
+        function submitAnswer() {
+            const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+            if (!selectedAnswer) return;
+
+            const answerIndex = parseInt(selectedAnswer.value);
+            userAnswers[currentQuestionIndex] = answerIndex;
+
+            if (answerIndex === questions[currentQuestionIndex].correct) {
+                score++;
+            }
+
+            showAnswer();
+            updateScore();
+        }
+
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            const userAnswer = userAnswers[currentQuestionIndex];
+
+            options.forEach((option, index) => {
+                const radio = option.querySelector('input[type="radio"]');
+                radio.disabled = true;
+                
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === userAnswer && userAnswer !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+                
+                if (index === userAnswer) {
+                    radio.checked = true;
+                }
+            });
+
+            document.getElementById('explanation').classList.add('show');
+            document.getElementById('submitBtn').style.display = 'none';
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('finishBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('nextBtn').disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+        }
+
+        function updateScore() {
+            document.getElementById('currentScore').textContent = score;
+        }
+
+        function updateControls() {
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').disabled = userAnswers[currentQuestionIndex] === undefined;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('finishBtn').style.display = 'none';
+        }
+
+        function finishQuiz() {
+            quizCompleted = true;
+            document.getElementById('questionsContainer').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            const finalScoreElement = document.getElementById('finalScore');
+            const scoreMessageElement = document.getElementById('scoreMessage');
+            
+            finalScoreElement.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            let scoreClass, message;
+            if (percentage >= 90) {
+                scoreClass = 'score-excellent';
+                message = 'Excellent! You have a strong understanding of TOGAF concepts.';
+            } else if (percentage >= 70) {
+                scoreClass = 'score-good';
+                message = 'Good job! You have a solid grasp of TOGAF principles.';
+            } else if (percentage >= 50) {
+                scoreClass = 'score-fair';
+                message = 'Fair performance. Consider reviewing TOGAF documentation for better understanding.';
+            } else {
+                scoreClass = 'score-poor';
+                message = 'You may want to study TOGAF concepts more thoroughly before taking the actual exam.';
+            }
+            
+            finalScoreElement.className = `final-score ${scoreClass}`;
+            scoreMessageElement.textContent = message;
+            document.getElementById('results').classList.add('show');
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            quizCompleted = false;
+            
+            document.getElementById('questionsContainer').style.display = 'block';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('results').classList.remove('show');
+            
+            updateScore();
+            renderQuestion();
+        }
+
+        // Initialize quiz on page load
+        window.onload = initializeQuiz;
+    </script>
+</body>
+</html>
